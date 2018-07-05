@@ -1,4 +1,6 @@
-<p>DevChallenge 12 JS (pro) - Round1</p>
+<p>Проект Schedule</p>
+
+<strong> Демо версія: http://schedule.yanovsky.com.ua </strong>
 
 Проект виконаний з використанням фреймворку Angular 6.0
 
