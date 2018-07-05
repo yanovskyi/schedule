@@ -1,0 +1,36 @@
+html, body {
+    margin: 0;
+    padding: 0;
+}
+.info-graphic-block {
+    background-color: transparent;
+}
+.info-graphic-sidenav {
+    width: 350px;
+}
+.mat-drawer-container {
+    background-color: #fff !important;
+}
+
+.mat-drawer {
+    background-color: #e8f3fa !important;
+}
+
+#sidenavContent {
+    text-align: center;
+    font-family: Arial;
+}
+
+#sidenavContentTitle {
+    font-size: 26px;
+    margin-bottom: 25px;
+    margin-top: 20px;
+}
+
+mat-form-field, mat-slide-toggle {
+    margin-top: 20px;
+}
+
+.color-picker {
+    top: -300px !important;
+}

@@ -1,0 +1,212 @@
+<!-- Основне меню -->
+<mat-menu #rootMenu="matMenu">
+    <button mat-menu-item [matMenuTriggerFor]="subEditMenu">Редагувати / Додати</button>
+    <button mat-menu-item [matMenuTriggerFor]="subIOMenu">Імпорт / Експорт</button>
+</mat-menu>
+      
+<mat-menu #subEditMenu="matMenu">
+    <button mat-menu-item (click)="showSidenav('commonPeriods')">Спільні періоди</button>
+    <button mat-menu-item (click)="showSidenav('periods')">Періоди</button>
+    <button mat-menu-item (click)="showSidenav('activities')">Події</button>
+    <button mat-menu-item (click)="showSidenav('signedPoints')">Відмічений час</button>
+</mat-menu>
+
+<mat-menu #subIOMenu="matMenu">
+    <button mat-menu-item (click)="importFile()">Імпорт файлу</button>
+    <button mat-menu-item (click)="exportFile()">Експорт файлу</button>
+    <button mat-menu-item (click)="exportImage()">Експорт зображення</button>
+</mat-menu>
+
+<!-- використання сайдбару з material -->
+<mat-sidenav-container>
+    <!-- права частина сайдбару, яка на початку не відображаться до використання меню -->
+    <!-- та використовується для редагування/видалення/додавання складових інфографіки -->
+    <mat-sidenav #sidenav mode="side" (openedChange)='rebuildAfterSidenav()' position="end" class='info-graphic-sidenav'>
+        <div>
+            <div style='text-align: left; float: left;'>
+                <button mat-mini-fab color="primary" title='save' style='position: relative; left:10px; top: 10px' (click)="sidenavSave()">
+                    <mat-icon>save</mat-icon>
+                </button>
+            </div>
+            <div style='text-align: right; float:left;'>
+                <button mat-mini-fab color="warn" title='delete' style='position: relative; left:25px; top: 10px' (click)="sidenavDelete()">
+                    <mat-icon>close</mat-icon>
+                </button>
+            </div>
+            <div style='text-align: right; float:right;'>
+                <button mat-mini-fab color="accent" title='close' style='position: relative; right:10px; top: 10px' (click)="sidenav.close()">
+                    <mat-icon>arrow_forward</mat-icon>
+                </button>
+            </div>
+            <div style='clear:both'></div>
+        </div>
+        <div id="sidenavContent">
+            <div id="sidenavContentTitle"></div>
+            <div id='activityBlock'>
+                <mat-form-field>
+                    <mat-select placeholder="Розклад" [(value)]="scheduleSelected" (selectionChange)='scheduleChanged()'>
+                        <mat-option *ngFor="let schedule of infoGraphicData['schedules']; let i = index" [value]="'schedule' + i">
+                            {{ schedule.title }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+    
+                <mat-form-field>
+                    <mat-select placeholder="Подія" [(value)]="activitySelected" (selectionChange)='activityChanged()'>
+                        <mat-option *ngFor="let activity of activities; let i = index" [value]="'activity' + i">
+                            {{ activity.title }} [ {{ activity.startTime }} - {{ activity.endTime }} ]
+                        </mat-option>
+                        <mat-divider></mat-divider>
+                        <mat-option value="activity-1">
+                            Додати нову подію
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+    
+                <mat-form-field>
+                    <input #activityTitleEl matInput placeholder="Назва" [(value)]="activityTitleValue">
+                </mat-form-field>
+    
+                <mat-form-field>
+                    <input #activityStartTimeEl matInput placeholder="Початок (час)" atp-time-picker [(value)]="activityStartTime" />
+                </mat-form-field>
+    
+                <mat-form-field>
+                    <input #activityEndTimeEl matInput placeholder="Кінець (час)" atp-time-picker [(value)]="activityEndTime" />
+                </mat-form-field>
+    
+                <mat-form-field>
+                    <!-- <input #activityColorEl matInput placeholder="Колір" [(value)]="activityColor"/> -->
+                    <input [(colorPicker)]="activityColor" [style.color]="activityColor" [cpPositionRelativeToArrow]="true" [cpPosition]="'top'" matInput #activityColorEl placeholder="Колір" [value]="activityColor"/>
+                </mat-form-field>
+    
+                <mat-slide-toggle
+                #activitySlide
+                color="primary"
+                [(checked)]="activityToHighlight">
+                    Виділити (вище за інші)
+                </mat-slide-toggle>
+            </div>
+
+            <div id='commonPeriodBlock'>
+    
+                <mat-form-field>
+                    <mat-select placeholder="Спільний період" [(value)]="commonPeriodSelected" (selectionChange)='commonPeriodChanged()'>
+                        <mat-option *ngFor="let commonPeriod of commonPeriods; let i = index" [value]="'commonPeriod' + i">
+                            {{ commonPeriod.title }} [ {{ commonPeriod.startTime }} - {{ commonPeriod.endTime }} ]
+                        </mat-option>
+                        <mat-divider></mat-divider>
+                        <mat-option value="commonPeriod-1">
+                            Додати новий спільний період
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+    
+                <mat-form-field>
+                    <input #commonPeriodTitleEl matInput placeholder="Назва" [(value)]="commonPeriodTitleValue">
+                </mat-form-field>
+    
+                <mat-form-field>
+                    <input #commonPeriodStartTimeEl matInput placeholder="Початок (час)" atp-time-picker [(value)]="commonPeriodStartTime" />
+                </mat-form-field>
+    
+                <mat-form-field>
+                    <input #commonPeriodEndTimeEl matInput placeholder="Кінець (час)" atp-time-picker [(value)]="commonPeriodEndTime" />
+                </mat-form-field>
+    
+            </div>
+
+            <div id='periodBlock'>
+                <mat-form-field>
+                    <mat-select placeholder="Розклад" [(value)]="scheduleSelected" (selectionChange)='scheduleChanged()'>
+                        <mat-option *ngFor="let schedule of infoGraphicData['schedules']; let i = index" [value]="'schedule' + i">
+                            {{ schedule.title }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+    
+                <mat-form-field>
+                    <mat-select placeholder="Період" [(value)]="periodSelected" (selectionChange)='periodChanged()'>
+                        <mat-option *ngFor="let period of periods; let i = index" [value]="'period' + i">
+                            {{ period.title }} [ {{ period.startTime }} - {{ period.endTime }} ]
+                        </mat-option>
+                        <mat-divider></mat-divider>
+                        <mat-option value="period-1">
+                            Додати новий період
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+    
+                <mat-form-field>
+                    <input #periodTitleEl matInput placeholder="Назва" [(value)]="periodTitleValue">
+                </mat-form-field>
+    
+                <mat-form-field>
+                    <input #periodStartTimeEl matInput placeholder="Початок (час)" atp-time-picker [(value)]="periodStartTime" />
+                </mat-form-field>
+    
+                <mat-form-field>
+                    <input #periodEndTimeEl matInput placeholder="Кінець (час)" atp-time-picker [(value)]="periodEndTime" />
+                </mat-form-field>
+    
+                <div>
+                    <mat-slide-toggle
+                    #periodSlide
+                    color="primary"
+                    [(checked)]="periodBackground">
+                        Фон
+                    </mat-slide-toggle>
+                </div>
+            </div>
+
+            <div id='signedPointBlock'>
+                <mat-form-field>
+                    <mat-select placeholder="Розклад" [(value)]="scheduleSelected" (selectionChange)='scheduleChanged()'>
+                        <mat-option *ngFor="let schedule of infoGraphicData['schedules']; let i = index" [value]="'schedule' + i">
+                            {{ schedule.title }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+    
+                <mat-form-field>
+                    <mat-select placeholder="Відмічений час" [(value)]="signedPointSelected" (selectionChange)='signedPointChanged()'>
+                        <mat-option *ngFor="let signedPoint of signedPoints; let i = index" [value]="'signedPoint' + i">
+                            {{ signedPoint.title }} [ {{ signedPoint.time }} ]
+                        </mat-option>
+                        <mat-divider></mat-divider>
+                        <mat-option value="signedPoint-1">
+                            Відмітити час
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+    
+                <mat-form-field>
+                    <input #signedPointTitleEl matInput placeholder="Назва" [(value)]="signedPointTitleValue">
+                </mat-form-field>
+    
+                <mat-form-field>
+                    <input #signedPointTimeEl matInput placeholder="Початок (час)" atp-time-picker [(value)]="signedPointTime" />
+                </mat-form-field>
+    
+                <mat-slide-toggle
+                #signedPointSlide
+                color="primary"
+                [(checked)]="signedPointAlign">
+                    Розташування назви зліва
+                </mat-slide-toggle>
+            </div>
+
+        </div>
+    </mat-sidenav>
+    <!-- Основна частина застосунку, в якій розташований canvas - з його використанням будується інфографіка -->
+    <mat-sidenav-content>
+        <!-- кнопка для відображення основного меню -->
+        <button mat-fab color="primary" style='position: absolute; left:10px; top: 10px' [matMenuTriggerFor]="rootMenu">
+            <mat-icon>more_vert</mat-icon>
+        </button>
+        <div class='info-graphic-block' #infoGraphicBlock>
+            <canvas class='info-graphic-canvas' #infoGraphicCanvas></canvas>
+        </div>
+    </mat-sidenav-content>
+</mat-sidenav-container>
+
